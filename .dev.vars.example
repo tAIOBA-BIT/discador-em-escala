@@ -1,0 +1,9 @@
+# Copie para .dev.vars somente para desenvolvimento local. Nunca versione .dev.vars.
+TELEPHONY_PROVIDER=simulator
+PUBLIC_BASE_URL=http://localhost:3000
+TWILIO_ACCOUNT_SID=
+TWILIO_AUTH_TOKEN=
+TWILIO_FROM_NUMBER=
+SELLER_DESTINATION=
+DATA_ENCRYPTION_KEY=
+RETENTION_JOB_TOKEN=
