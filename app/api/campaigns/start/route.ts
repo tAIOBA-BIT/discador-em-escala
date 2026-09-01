@@ -15,7 +15,7 @@ export async function POST(request: Request) {
   const providerLimit = Math.min(10, Number(process.env.PROVIDER_CONCURRENCY_LIMIT ?? 10));
   if (!body?.contacts?.length) return Response.json({ error: 'invalid_concurrency_or_contacts' }, { status: 422 });
   if (!Number.isInteger(concurrency) || concurrency < 1) return Response.json({ error: 'invalid_concurrency_or_contacts' }, { status: 422 });
-  if (!withinCallingHours(new Date(), Number(process.env.CALLING_START_HOUR ?? 9), Number(process.env.CALLING_END_HOUR ?? 18))) return Response.json({ error: 'outside_calling_hours' }, { status: 409 });
+  // Horário liberado 24h
   const selected = body.contacts.slice(0, concurrency); if (selected.some((contact) => contact.doNotCall)) return Response.json({ error: 'do_not_call_contact_selected' }, { status: 409 });
   const normalized = selected.map((contact) => ({ ...contact, phone: normalizeE164(contact.phone) }));
   const db = (env as unknown as { DB: RuntimeDb }).DB; if (!(await consumeRateLimit(db, `start:${actor.userId}`, 10, 60_000))) return Response.json({ error: 'rate_limited' }, { status: 429, headers: { 'Retry-After': '60' } });
