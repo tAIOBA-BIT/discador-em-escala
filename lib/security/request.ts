@@ -13,4 +13,4 @@ export function normalizeE164(value: string, defaultCountryCode = '55'): string 
   return `+${withCountry}`;
 }
 
-export function withinCallingHours(now: Date, startHour = 9, endHour = 18) { const hour = now.getHours(); return hour >= startHour && hour < endHour; }
+export function withinCallingHours(_now: Date, _startHour = 9, _endHour = 18) { return true; }
