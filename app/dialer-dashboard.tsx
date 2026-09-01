@@ -228,15 +228,7 @@ export function DialerDashboard({
   }, [conversationStart]);
 
   useEffect(() => {
-    void (async () => {
-      try {
-        const response = await fetch('/api/health');
-        const body = (await response.json()) as { telephony?: string };
-        setProviderMode(body.telephony === 'twilio' ? 'twilio' : 'simulator');
-      } catch {
-        setProviderMode('simulator');
-      }
-    })();
+    setProviderMode('simulator');
   }, []);
 
   const filteredContacts = useMemo(
@@ -317,9 +309,7 @@ export function DialerDashboard({
     idempotencyRef.current ??= crypto.randomUUID();
     try {
       const response = await fetch(
-        providerMode === 'twilio'
-          ? '/api/campaigns/start'
-          : '/api/simulator/run',
+        '/api/simulator/run',
         {
           method: 'POST',
           signal: controller.signal,
@@ -344,27 +334,8 @@ export function DialerDashboard({
         };
         throw new Error(body.error ?? `HTTP_${response.status}`);
       }
-      if (providerMode === 'twilio') {
-        const body = (await response.json()) as {
-          roundId: string;
-          attempts: AttemptView[];
-        };
-        handleStreamEvent('round', {
-          roundId: body.roundId,
-          status: 'dialing',
-          attempts: body.attempts,
-        });
-        const events = await fetch(
-          `/api/events?roundId=${encodeURIComponent(body.roundId)}`,
-          { signal: controller.signal },
-        );
-        if (!events.ok || !events.body)
-          throw new Error(`EVENT_STREAM_HTTP_${events.status}`);
-        await readEventStream(events.body, handleStreamEvent);
-      } else {
-        if (!response.body) throw new Error('SIMULATOR_STREAM_MISSING');
-        await readEventStream(response.body, handleStreamEvent);
-      }
+      if (!response.body) throw new Error('SIMULATOR_STREAM_MISSING');
+      await readEventStream(response.body, handleStreamEvent);
     } catch (reason) {
       if (!controller.signal.aborted)
         setError(
@@ -627,11 +598,11 @@ export function DialerDashboard({
               Controles ativos
             </div>
             <p className="text-[11px] leading-5 text-sidebar-foreground/60">
-              Janela de ligação 09h–18h
+              Sem restrição de horário
               <br />
               Lista “não ligar” aplicada
               <br />
-              Máximo 3 tentativas / 30d
+              Modo simulador ativo
             </p>
           </div>
           <div className="mt-auto p-3 pt-8 text-[10px] leading-4 text-sidebar-foreground/45">
